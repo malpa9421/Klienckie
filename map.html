@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>MPTools</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/0.5.16/p5.min.js" type="text/javascript"></script>
+    <script src="https://unpkg.com/mappa-mundi/dist/mappa.js" type="text/javascript"></script>
+
+    <style>
+        
+        body{
+            background-color: rgb(20,20,21);
+        
+            width: 100%;
+            
+            overflow-x: hidden;
+            padding-top: 4px;
+            padding-left: 8px;
+        }
+        
+        #lokalizacja{
+            color:white;
+
+        }
+
+        *{
+            z-index: 1 !important;
+        }
+
+        #bok{
+            z-index: 4;
+            background-color: white;
+            position:absolute;
+            right: 0;
+            width:198px;
+            height:330px;
+            margin-right:-8px;
+            margin-top:85px;
+            padding: 16px;
+            padding-top: 50px;
+            
+            clip-path: polygon(0% 87%, 20% 100%, 100% 100%, 100% 0%, 20% 0%, 0% 13%);
+
+            animation-name: bok;
+            animation-duration: 1.2s;
+    }
+        @keyframes bok {
+               0%   {right:-50px;}
+               100% {right:0px;}
+                  } 
+
+
+        #bok button{
+            width: 100%;
+        }
+
+        input{
+            width: 74px;
+        }
+
+        #ozdoba{
+            position: absolute;
+            z-index: 3;
+            right: 0;
+            background-color: rgb(196, 122, 43);
+            width:198px;
+            margin-top: 53px;
+            height:317px;
+            padding: 16px;
+            padding-top: 50px;
+            
+            clip-path: polygon(0% 87%, 20% 100%, 100% 100%, 100% 0%, 20% 0%, 0% 13%);
+
+            animation-name: ozdoba;
+            animation-duration: 1.2s;
+        }
+
+        @keyframes ozdoba {
+               0%   {right:-50px;}
+               100% {right:0px;}
+                  } 
+
+        #Dlugosc_trasy{
+            margin-left: 9px;
+        }
+
+    
+    </style>
+
+
+</head>
+      
+<body>
+    <span id="lokalizacja">Twoja lokalizacja: Zaakceptuj pozwolenie na użycie danych lokalizacyjnych</span>
+    
+    <br><br>
+    
+    <div id="ozdoba">
+
+    </div>
+    <div id="bok">
+        Dodaj punkt:
+        <fieldset>
+            <button onclick="dodawanie()">Dodaj punkt na mapie</button><br><br>
+            <button onclick="dodawanielok(window.latitude, window.longitude)">Dodaj punkt w mojej lokalizacji.</button><br><br>
+
+            <button onclick="dodawanielok2()">Dodaj punkt według koordynatów.</button>
+            <input type="number" placeholder="Lat" id="form_lat">
+            <input type="number" placeholder="Log" id="form_log"><br><br>
+        </fieldset>
+        <br>
+        <button onclick="usuwanie()">Usuń ostatni punkt</button><br><br>
+        <button onclick="dodawanietrasy()">Zamień w trasę</button>
+        <!-- niestety nie działa<button onclick="dodawanieobszaru()">Zamień w obszar</button> -->
+        <p id="Dlugosc_trasy"></p>
+    </div>
+
+    
+
+    <div id="mapa">
+    <script>
+        var rozmiar_mapy=innerWidth*0.73;
+        window.addEventListener('resize', function(event) {
+            if (window.innerWidth<rozmiar_mapy+260) {
+                document.getElementById("bok").style.position="relative";
+                document.getElementById("bok").style.clipPath="none";
+                document.getElementById("bok").style.right="inherit";
+                document.getElementById("ozdoba").style.visibility="hidden";
+            }
+            else{
+                document.getElementById("bok").style.position="absolute";
+                document.getElementById("bok").style.clipPath="polygon(0% 87%, 20% 100%, 100% 100%, 100% 0%, 20% 0%, 0% 13%)";
+                document.getElementById("bok").style.right=0;
+                document.getElementById("ozdoba").style.visibility="visible";
+            }
+            }, true);
+
+
+        getLocation();
+        function getLocation() {
+        if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(cPosition);
+       
+        } 
+        else { 
+         alert("Geolocation is not supported by this browser.");
+        }
+}
+
+        function cPosition(position) {
+        window.latitude=position.coords.latitude;
+        window.longitude=position.coords.longitude;
+        document.getElementById("lokalizacja").innerHTML="Twoja lokalizacja: "+window.latitude+" "+window.longitude+" <button onclick='lokalizacja(8)' id='przycisk'>Znajdź mnie!</button>";
+        // x.innerHTML = "Latitude: " +  + 
+        // "<br>Longitude: " + ;
+        }
+
+
+    
+            let dodawan=0;
+        function dodawanie() {
+            dodawan=1;
+        }
+
+        function usuwanie() {
+            punkty.pop();
+            rysuj();
+        }
+
+        let trasa=0;
+        function dodawanietrasy(){
+            trasa=1;
+            rysuj();
+            
+        }
+
+        let pole=0;
+        function dodawanieobszaru(){
+            trasa=0;
+            pole=1;
+            rysuj();
+            
+        }
+        
+
+        
+        function dodawanielok(lat, lng) {
+            //nie wiem jak to zrobić inaczej xDDd
+            let kordy = myMap.latLngToPixel(lat, lng); 
+            ellipse(kordy.x, kordy.y, 15, 15);
+            myMap.map.flyTo([window.latitude, window.longitude]);
+            punkty.push(myMap.pixelToLatLng(kordy.x, kordy.y));
+            dodawan=2;
+
+        }
+
+        function dodawanielok2() {
+            var lat=document.getElementById("form_lat").value;
+            var lng= document.getElementById("form_log").value;
+            let kordy = myMap.latLngToPixel(lat, lng); 
+            ellipse(kordy.x, kordy.y, 15, 15);
+            myMap.map.flyTo([lat, lng]);
+            punkty.push(myMap.pixelToLatLng(kordy.x, kordy.y));
+            dodawan=2;
+
+        }
+
+        let myMap;
+        let canvas;
+        const mappa = new Mappa('Leaflet');
+        
+        let options;
+        function setup(){
+         options={
+        lat: 0,
+        lng: 0,
+        zoom: 4,
+        style: "http://{s}.tile.osm.org/{z}/{x}/{y}.png"
+        }
+
+        canvas = createCanvas(rozmiar_mapy,window.innerHeight-90); 
+
+        myMap = mappa.tileMap(options); 
+        
+        myMap.overlay(canvas);
+        
+        fill(219, 76, 4);
+
+        myMap.onChange(rysuj);
+        
+        }
+        let punkty=[];
+        function draw() {
+            if (mouseIsPressed && dodawan==1) {
+            punkty.push(myMap.pixelToLatLng(mouseX, mouseY));
+            ellipse(mouseX, mouseY, 15, 15);
+            dodawan=2;
+            //alert(punkty[0].lat);
+            }
+        }
+
+            
+        function rysuj() {
+            if(dodawan==2)
+            {
+                
+                clear();
+                
+                //beginpath  move to lineTo stroke
+                let dlugosc_trasy=0;
+                let area=0;
+                for (let i = 0; i < punkty.length; i++) {
+                    let kordy = myMap.latLngToPixel(punkty[i].lat, punkty[i].lng); 
+                    ellipse(kordy.x, kordy.y, 15, 15);
+                    if (i!=0 && trasa) {
+                        let poprzedni = myMap.latLngToPixel(punkty[i-1].lat, punkty[i-1].lng); 
+                        line(poprzedni.x, poprzedni.y, kordy.x, kordy.y);
+                        
+                        let lon1 =  punkty[i].lng * Math.PI / 180;
+                        let lon2 = punkty[i-1].lng * Math.PI / 180;
+                        let lat1 = punkty[i].lat * Math.PI / 180;
+                        let lat2 = punkty[i-1].lat * Math.PI / 180;
+                        let dlon = lon2 - lon1;
+                        let dlat = lat2 - lat1;
+                        let a = Math.pow(Math.sin(dlat / 2), 2)+ Math.cos(lat1) * Math.cos(lat2)* Math.pow(Math.sin(dlon / 2),2);
+                            
+                        let c = 2 * Math.asin(Math.sqrt(a));
+                        let r = 6371;
+                        
+                        dlugosc_trasy+=(c*r);
+                        
+                    }
+                    else if (pole) {
+                        
+                        if (i!=0) {
+                            let poprzedni = myMap.latLngToPixel(punkty[i-1].lat, punkty[i-1].lng); 
+                            line(poprzedni.x, poprzedni.y, kordy.x, kordy.y);
+                            area+=punkty[i-1].lat*111*punkty[i].lng*111-punkty[i-1].lng*111*punkty[i].lat*111;
+                            if (i+1==punkty.length) {
+                                let pierwszy = myMap.latLngToPixel(punkty[0].lat, punkty[0].lng); 
+                                line(pierwszy.x, pierwszy.y, kordy.x, kordy.y);
+                                area+=punkty[i].lat*111*punkty[0].lng*111-punkty[i].lng*111*punkty[0].lat*111;
+                            }
+                        }
+                    }
+                    
+                }
+                if (trasa) {
+                document.getElementById("Dlugosc_trasy").innerHTML="Długość trasy: "+dlugosc_trasy.toFixed(2)+" Km";
+                    
+                }
+                if (pole) {
+                document.getElementById("Dlugosc_trasy").innerHTML="Pole: "+(area/2).toFixed(2);
+                    
+                }
+            }
+
+        }
+
+        function lokalizacja(zoom) {
+            myMap.map.flyTo([window.latitude, window.longitude], zoom);
+        }
+
+        
+    </script>
+    </div>
+</body>
+      
+      </html>

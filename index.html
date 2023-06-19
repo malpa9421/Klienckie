@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MPTools</title>
+    <style>
+        @font-face {
+        font-family: Title;
+        src: url(fonty/BiggyJohn.ttf);
+        }
+
+        *{
+            padding: 0%;
+            margin: 0;
+        }
+        canvas{
+            background-color: black;
+
+        }
+        body{
+            width: 100%;
+            overflow-y: hidden; /* Hide vertical scrollbar */
+            overflow-x: hidden; /* Hide horizontal scrollbar */
+        }
+        #intro{
+            left: 0;
+            right: 0;
+            top: 36%;
+            
+            position: absolute;
+            
+            width: 300px;
+            color: white;
+            margin:auto;
+            animation-name: title;
+            animation-duration: 0.75s;
+            
+        }
+        @keyframes title {
+               0%   {opacity: 20%;}
+               100% {opacity:100%;}
+                  } 
+
+
+        #intro h1{
+            font-family: Title;
+            font-size: 70px;
+            text-align: center;
+        }
+
+        .pomarancz{
+            color: rgb(219, 76, 4);
+            font-size: 95px;
+        }
+
+        #intro hr{
+            width: 150px;
+            margin-left: 13px;
+            border-color: rgb(219, 76, 4);
+            margin-bottom: 7px;
+        }
+
+        #intro p{
+            text-align: center;
+            font-size: 20px;
+            text-shadow: -1px 0 black, 0 1px black, 1px 0 black, 0 -1px black;
+        }
+
+        #autor{
+            margin-right: 13px;
+            text-align: right !important;
+            font-size: 15px !important; 
+             
+        }
+
+
+        #Przejdz_dalej{
+            width: 74px;
+            height: 74px;
+            background-color: rgb(219, 76, 4);
+
+            position: absolute;
+            right: 0;
+            bottom: 0;
+        }
+
+        img{
+            margin-left: 6px;
+            margin-top: 1px;
+            height: 97%;
+            transition-property: filter;
+            transition-duration: 0.4s;
+        }
+
+        #Przejdz_dalej:hover img{
+            filter: invert(100%);
+        }
+    
+    </style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/0.5.16/p5.min.js" type="text/javascript"></script>
+</head>
+<body>
+    <div id="intro">
+        <h1><span class="pomarancz">MP</span>Tools</h1>
+        <hr>
+        <p>I wisely started with a map.</p>
+        <p id="autor" class="pomarancz">- J.R.R. Tolkien</p>
+    </div>
+
+    <div id="Przejdz_dalej">
+    <a href="map.html"><img src="obrazy/Arrowh.png" alt="Przejdz do mapy"></a>
+    </div>
+
+
+        <script>
+            window.addEventListener('resize', function(event) {
+                setup();
+            }, true);
+
+            function setup(params) {
+                createCanvas(window.innerWidth, innerHeight+4);
+                stroke(255,255,255);
+            }
+
+
+
+           
+        
+            
+            function Circle(x,y, zx, zy, radius) {
+                this.x = x;
+                this.y = y;
+                this.zx = zx;
+                this.zy = zy;
+                this.radius = radius;
+
+                this.draw = function(){
+                    ellipse(this.x,this.y,this.radius+26,this.radius+26);
+                    
+                }
+
+                this.update=function(){
+                    if (Math.abs(this.x-mouseX)<this.radius+65 && Math.abs(this.y-mouseY)<this.radius+65) {
+                        if (this.x>mouseX) {
+                            this.x-=1;
+                        }
+                        else if (this.x<mouseX) {
+                            this.x+=1;
+                        }
+
+                        if (this.y>mouseY) {
+                            this.y-=1;
+                        }
+                        else if (this.y<mouseY) {
+                            this.y+=1;
+                        }
+                        
+                    }
+                    else{
+                        if (this.x+this.radius>innerWidth || this.x-this.radius<0) {
+                            this.zx=-this.zx;
+                        }
+                        if (this.y+this.radius>innerHeight || this.y-this.radius<0) {
+                            this.zy=-this.zy;
+                        }
+                        this.x+=this.zx;
+                        this.y+=this.zy;
+                        
+                    }
+                    this.draw();
+                    
+                }
+            }
+            
+            let circles=[];
+            for (let i = 0; i < 39; i++) {
+                var radius=34;
+                var x=Math.random()*(window.innerWidth-(radius*2+1))+radius+1;
+                var y=Math.random()*(window.innerHeight-(radius*2+1))+radius+1;
+                if (i%2==0) {
+                    var zx=-(Math.random()*0.6+0.1);
+                    var zy=-(Math.random()*0.6+0.1);
+                }
+                else{
+                    var zx=Math.random()*0.6+0.1;
+                    var zy=Math.random()*0.6+0.12;
+                }
+                circles.push(new Circle(x,y,zx,zy,24));
+                
+            }
+
+        draw();
+           
+            
+        function draw() {
+            clear();
+            //alert(mouseX);
+            
+            for (let i = 0; i < 39; i++) {
+                if (i%2==0) {
+                    fill(20,20,21)
+                }
+                else{
+                    fill(196, 122, 43)
+                }
+                circles[i].update();
+                
+            }
+            
+            
+        }     
+
+        </script>
+</body>
+</html>
